@@ -42,7 +42,7 @@ const parseQuiz = (text) => {
     setLoading(true);
 
     try {
-      const res = await axios.post("https://ai-study-backend.onrender.com/study", {
+      const res = await axios.post("https://ai-study-assisstant.onrender.com/study", {
         task: "summarize, explain and quiz",
         content: topic,
       });
