@@ -2,12 +2,34 @@ import google.generativeai as genai
 import os
 import json
 from dotenv import load_dotenv
-
+from itertools import cycle
 # ------------------ SETUP ------------------
 load_dotenv()
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+api_keys = [
+    os.getenv("GEMINI_API_KEY_1"),
+    os.getenv("GEMINI_API_KEY_2"),
+    os.getenv("GEMINI_API_KEY_3"),
+]
 
-model = genai.GenerativeModel("gemini-2.5-flash-lite")
+api_keys = [key for key in api_keys if key]
+
+if not api_keys:
+    raise ValueError("❌ No API keys found")
+
+print(f"✅ Loaded {len(api_keys)} API keys")
+
+
+# Create rotating cycle
+key_cycle = cycle(api_keys)
+
+def get_model():
+    key = next(key_cycle)
+    genai.configure(api_key=key)
+    return genai.GenerativeModel("gemini-2.5-flash")
+
+
+
+
 
 # ------------------ TOOLS ------------------
 
@@ -27,6 +49,7 @@ def summarize(text):
     Topic:
     {text}
     """
+    model = get_model()
     return model.generate_content(prompt).text
 
 
@@ -46,6 +69,7 @@ def explain(text):
     Topic:
     {text}
     """
+    model = get_model()
     return model.generate_content(prompt).text
 
 def generate_quiz(text):
@@ -74,7 +98,7 @@ def generate_quiz(text):
         Topic:
         {text}
         """
-
+        model = get_model()
         response = model.generate_content(prompt)
         all_questions += response.text + "\n\n"
 
@@ -108,7 +132,7 @@ def plan_steps(task):
         "steps": ["summarize", "explain"]
     }}
     """
-
+    model = get_model()
     response = model.generate_content(prompt)
     return response.text
 
